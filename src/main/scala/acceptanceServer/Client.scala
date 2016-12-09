@@ -1,45 +1,42 @@
 package acceptanceServer
 
-import java.io._
+import java.io.{IOException, BufferedReader => BR, InputStream => IS, InputStreamReader => ISR, OutputStream => OS, PrintWriter => PW}
 import java.net.Socket
+
+import akka.actor.Actor
+
 
 /**
   * クライアントごとにストリームを管理するためのクラス
   */
-class Client(var sock: Socket) {
-  private var fin: InputStream = null // 入力ストリーム
-  private var fout: OutputStream = null // 出力ストリーム
-  private var in: BufferedReader = null // 文字列入力ストリーム
-  private var out: PrintWriter = null // 文字列出力ストリーム
-  @throws[IOException]
-  def openStream() {
-    // ストリームの確立
-    fin = sock.getInputStream
-    in = new BufferedReader(new InputStreamReader(fin))
-    fout = sock.getOutputStream
-    out = new PrintWriter(fout, true)
-    return
-  }
+class Client(var sock: Socket) extends Actor{
+  private val in: BR = new BR(new ISR(sock.getInputStream()))
+  private val out: PW = new PW(sock.getOutputStream(), true) // 文字列出力ストリーム
 
-  def println(str: String) {
-    this.out.println(str)
-    return
-  }
+  // if receive Message "print", call this method and print message for client
+  private def println(str: String) = this.out.println(str)
 
-  def read: String = {
+  // if receive Message "read", call this method and read message from client
+  private def read: String = {
     var line: String = ""
+
     try {
       line = in.readLine
     }
     catch {
       case e: IOException => {
+        System.out.println(s"Client.read($line)")
         e.printStackTrace()
       }
     }
-    return line
+
+    line
   }
 
   def closeStream() {
+    val fin = sock.getInputStream
+    val fout = sock.getOutputStream
+
     try {
       // クローズ
       if (in != null) {
@@ -63,6 +60,11 @@ class Client(var sock: Socket) {
         System.out.println("error" + e)
       }
     }
-    return
+  }
+
+  override def receive: Receive = {
+    case (cmd: String, args: String) if cmd == "print" => println(args)
+    case (cmd: String) if cmd == "read" => read
+    case _ => {}
   }
 }
