@@ -3,32 +3,53 @@ package acceptanceServer
 import java.io.IOException
 import java.net.Socket
 
-import RoomServer
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.pattern.ask
+import akka.actor.Actor.Receive
+import akka.event.Logging
+
+import scala.Option
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 /*
  * クライアントとの通信し，入力によって部屋に振り分ける
- */ object AssignRoomThread {
+ */
+object AssignRoomThread {
   private val room_manager: RoomManager = new RoomManager(RoomServer.ROOM_LIMIT, RoomServer.ENTRY_LIMIT)
 }
 
-class AssignRoomThread(val socket: Socket) extends Thread {
-  this.client = new Client(socket)
-  private var client: Client = null
+class AssignRoomThread extends Actor {
 
-  // 入力されたルームナンバーを抽出し，Int型にパースする
-  // 文字列から変換できない場合は-1を返す
-  private def parseInpumRoomNumber(str_room_num: String): Int = {
-    var input_num: Int = -1
-    // Int型に変換出来なければ-1をinput_numに代入する
-    try {
-      input_num = str_room_num.toInt
+  override def receive: Receive = {
+    case x: Socket => {
+      val props = Props(classOf[Client], x)
+      val client = RoomServer.actor_system.actorOf(props, name = "Client")
+      access(client)
     }
-    catch {
+    case _ => {}
+  }
+
+  private def access(client: ActorRef): Unit ={
+    val room_id = readRoomNumberFromClient(client, RoomServer.ROOM_LIMIT - 1)
+    System.out.println("Access to Room" + room_id)
+    AssignRoomThread.room_manager.moveToRoom(room_id, client) // :TODO change to Actor
+  }
+
+  /**
+    * string to int convert function
+    * if cannot convert string, return None
+    * string can be converted to int, return Some(int)
+    * @param str_num string to be going to be converted to int
+    */
+  private def toOptInt(str_num: String): Option[Int] = { // :TODO general, should extract?
+    try {
+      Option(str_num.toInt)
+    } catch {
       case e: NumberFormatException => {
-        input_num = -1
+        None
       }
     }
-    return input_num
   }
 
   /** ルームナンバーをクライアントに入力させ，その値を取り出す
@@ -36,64 +57,39 @@ class AssignRoomThread(val socket: Socket) extends Thread {
     * guest(ランダムなルームで良い)なら-1が返る
     * 入力を許す値の範囲をmin, maxで指定する
     *
-    * @param min 入力を許す値の下限，-1以下だとguestとの区別がつけられないため正常に動作しない，エラーを返すように
     * @param max 入力を許す値の上限
     */
-  private def readRoomNumberFromClient(min: Int, max: Int): Int = {
-    // クライアントからのメッセージ受信
-    // クライアントにルームナンバーを入力してもらい，その値をroom_numに代入する
-    var str_room_num: String = ""
-    var room_id: Int = -1
-    // 引数のエラーチェック
-    if (min < 0) {
-      throw new IllegalArgumentException
-    }
-    while (room_id < min) {
-      {
-        client.println("Input Room Number, " + min + "~" + max + " (or input 'guest')")
-        // 入力をパースしてroom_idに代入する
-        // 入力が正しくないなら，-1が入る
-        str_room_num = client.read
-        if (str_room_num.equalsIgnoreCase("guest")) {
-          room_id = -1
-          break //todo: break is not supported
-        }
-        // 入力を文字列から数値に変換する
-        try {
-          room_id = parseInpumRoomNumber(str_room_num)
-        }
-        catch {
-          case e: NumberFormatException => {
-            // 変換に失敗した場合，再度入力させる
-            client.println("please input number: ")
-            continue //todo: continue is not supported
-          }
-        }
-        if (room_id < min || room_id > max) {
-          // 範囲を超えた数値が入力された場合，room_id = -1として再度ループさせる
-          client.println("please " + min + " < [input] < " + max)
-          room_id = -1 // maxを超えた場合room_id > minとなってしまうため
-          continue //todo: continue is not supported
-        }
-      }
-    }
-    return room_id
-  }
+  private def readRoomNumberFromClient(client: ActorRef, max: Int, min: Int = 0): Int = {
+    /**
+     * クライアントに入力を促し、入力がguestなら-1として数字に変換する。変換できなければNoneが返る
+     */
+    def readInputNum: Option[Int] = {
+      val future_input: Future[Any] = client ? ("read", "Input Room Number, " + min + "~" + max + " (or input 'guest')")
+      // 入力をパースしてroom_idに代入する
+      // 入力が正しくないなら，-1が入る
 
-  override def run() {
-    var room_id: Int = -1
-    // ストリームの確立
-    try {
-      client.openStream()
+      // get Future-result, and wait until get value
+      // and cast to String
+      val str_room_num: String = Await.result(future_input, Duration.Inf).asInstanceOf[String]
+      if (str_room_num.equalsIgnoreCase("guest")) {
+        return Option(-1)
+      }
+      // 入力を文字列から数値に変換する
+
+      val room_id_opt: Option[Int] = toOptInt(str_room_num)
+
+      room_id_opt
     }
-    catch {
-      case e: IOException => {
-        e.printStackTrace()
+
+    while (true) { // :TODO bad method
+      val room_id_opt: Option[Int] = readInputNum
+
+      room_id_opt match {
+        case Some(x) if x == -1 => return x
+        case Some(x) if min <= x && x <= max => return x
       }
     }
-    room_id = readRoomNumberFromClient(0, RoomServer.ROOM_LIMIT - 1)
-    System.out.println("Access to Room" + room_id)
-    AssignRoomThread.room_manager.moveToRoom(room_id, client)
-    return
+
+    0 // no return this
   }
 }
