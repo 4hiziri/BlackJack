@@ -17,6 +17,7 @@ class Client(var sock: Socket) extends Actor{
   private def println(str: String) = this.out.println(str)
 
   // if receive Message "read", call this method and read message from client
+  // :TODO return option
   private def read: String = {
     var line: String = ""
 
@@ -25,7 +26,7 @@ class Client(var sock: Socket) extends Actor{
     }
     catch {
       case e: IOException => {
-        System.out.println(s"Client.read($line)")
+        System.out.println("Client:read error")
         e.printStackTrace()
       }
     }
@@ -34,8 +35,8 @@ class Client(var sock: Socket) extends Actor{
   }
 
   def closeStream() {
-    val fin = sock.getInputStream
-    val fout = sock.getOutputStream
+    val fin = sock.getInputStream()
+    val fout = sock.getOutputStream()
 
     try {
       // クローズ
@@ -63,8 +64,13 @@ class Client(var sock: Socket) extends Actor{
   }
 
   override def receive: Receive = {
+    // :TODO extract tuple to case class
     case (cmd: String, args: String) if cmd == "print" => println(args)
-    case (cmd: String) if cmd == "read" => read
+    case (cmd: String, args: String) if cmd == "read" => {
+      println(args)
+      val input = read
+      sender() ! input
+    }
     case _ => {}
   }
 }
