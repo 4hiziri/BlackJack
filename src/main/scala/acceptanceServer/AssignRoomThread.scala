@@ -1,23 +1,16 @@
 package acceptanceServer
 
-import java.io.IOException
 import java.net.Socket
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.pattern.ask
-import akka.actor.Actor.Receive
-import akka.event.Logging
 
-import scala.Option
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 /*
  * クライアントとの通信し，入力によって部屋に振り分ける
  */
-object AssignRoomThread {
-  private val room_manager: RoomManager = new RoomManager(RoomServer.ROOM_LIMIT, RoomServer.ENTRY_LIMIT)
-}
 
 class AssignRoomThread extends Actor {
 
@@ -33,7 +26,7 @@ class AssignRoomThread extends Actor {
   private def access(client: ActorRef): Unit ={
     val room_id = readRoomNumberFromClient(client, RoomServer.ROOM_LIMIT - 1)
     System.out.println("Access to Room" + room_id)
-    AssignRoomThread.room_manager.moveToRoom(room_id, client) // :TODO change to Actor
+    RoomManager.moveToRoom(room_id, client)
   }
 
   /**
