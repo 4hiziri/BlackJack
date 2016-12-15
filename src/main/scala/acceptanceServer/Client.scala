@@ -71,6 +71,7 @@ class Client(var sock: Socket) extends Actor{
       val input = read
       sender() ! input
     }
+    case str: String if str == "close" => closeStream()
     case _ => {}
   }
 }
