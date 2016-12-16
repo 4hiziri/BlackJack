@@ -4,6 +4,11 @@ import java.net.ServerSocket
 
 import akka.actor.{ActorSystem, Props}
 
+/**
+  * this object accepts connection
+  * socket of connection is thrown to AssignRoomThread Actor from here
+  * this object only processes socket throwing
+  */
 object RoomServer {
   // :TODO extract this setting and include at runtime
   private[serverApp] val ROOM_LIMIT: Int = 10
