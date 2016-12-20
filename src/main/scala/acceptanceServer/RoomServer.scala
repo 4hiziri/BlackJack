@@ -1,7 +1,5 @@
 package acceptanceServer
 
-import java.net.ServerSocket
-
 import akka.actor.{ActorSystem, Props}
 
 /**
@@ -11,10 +9,13 @@ import akka.actor.{ActorSystem, Props}
   */
 object RoomServer {
   // :TODO extract this setting and include at runtime
-  private[serverApp] val ROOM_LIMIT: Int = 10 // Number of Room, Limitation
-  private[serverApp] val ENTRY_LIMIT: Int = 10 // Number of Player in one Room, Limitation
+  val ROOM_LIMIT: Int = 10
+  // Number of Room, Limitation
+  val ENTRY_LIMIT: Int = 10
+  // Number of Player in one Room, Limitation
+  val system = ActorSystem("Room_Server")
+  // :TODO should i extract?
   private val PORT: Int = 59630 // Port for this program
-  val actor_system = ActorSystem("Room_Server") // :TODO should i extract?
 
   /**
     * main function
@@ -22,15 +23,6 @@ object RoomServer {
     * @param args nothing :TODO receive port num here?
     */
   def main(args: Array[String]) {
-    val sSock: ServerSocket = new ServerSocket(PORT) // wait on 59630-port
-    // number of AssignRoomThread is the same of simultaneous connection's one
-    // so generate Actor when this accepts connection
-    val props = Props(classOf[AssignRoomThread])
-
-    while (true) {
-      val client_sock = sSock.accept // wait being connected
-      // generate Actor and tell the socket as Message
-      actor_system.actorOf(props, name = "AssignRoomThread") ! client_sock
-    }
+    system.actorOf(Props(classOf[EntryServer], "localhost", PORT, Props(classOf[Client]))) // run Server Actor
   }
 }
