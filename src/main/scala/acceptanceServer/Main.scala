@@ -7,13 +7,13 @@ import akka.actor.{ActorSystem, Props}
   * socket of connection is thrown to AssignRoomThread Actor from here
   * this object only processes socket throwing
   */
-object RoomServer {
+object Main {
   // :TODO extract this setting and include at runtime
   val ROOM_LIMIT: Int = 10
   // Number of Room, Limitation
   val ENTRY_LIMIT: Int = 10
   // Number of Player in one Room, Limitation
-  val system = ActorSystem("Room_Server")
+  val system = ActorSystem("Entry_Server")
   // :TODO should i extract?
   private val PORT: Int = 59630 // Port for this program
 
