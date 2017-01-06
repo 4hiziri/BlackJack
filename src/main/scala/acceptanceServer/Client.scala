@@ -20,8 +20,7 @@ class Client(connection: ActorRef) extends Actor {
       val answer = sender()
       connection ! makeWrite(data)
       context.become({
-        case Received(data) => answer ! data.decodeString("UTF-8").stripLineEnd
-        case data: String => connection ! makeWrite(data)
+        case Received(data) => answer ! data.decodeString("UTF-8").stripLineEnd; context.become(receive)
         case _ => println("Client Question Error")
       }, discardOld = false)
     }
