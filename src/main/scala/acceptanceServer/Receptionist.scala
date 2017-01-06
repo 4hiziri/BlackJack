@@ -32,6 +32,7 @@ class Receptionist extends Actor {
     * if happen IOException, try again
     * if "guest" is inputted, return None
     * x: input Int number. if min <= x <= max, accept x and return Some(x)
+    * :TODO how handling input -1? more flexible way
     *
     * @param client is actor which has connection
     * @param max    is max of inputted num
@@ -52,7 +53,7 @@ class Receptionist extends Actor {
       // get Future-result, and wait until get value
       // and cast to String
       val str_room_num: String = Await.result(future_input, Duration.Inf).asInstanceOf[String]
-      println(str_room_num)
+
       // if inputted 'guest', return Some(-1)
       if (str_room_num.equalsIgnoreCase("guest")) {
         return Some(-1)
