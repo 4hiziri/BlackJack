@@ -1,21 +1,43 @@
 package acceptanceServer
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorRef}
 import akka.event.Logging
 import akka.io.Tcp
+import akka.util.ByteString
 /**
   * クライアントごとにストリームを管理するためのクラス
   */
-class Client extends Actor {
-  // :TODO use Actor.IO.Tcp
+class Client(connection: ActorRef) extends Actor {
   import Tcp._
 
-  val log = Logging(RoomServer.system, this) // use log utility
+  val log = Logging(Main.system, this)
+  // use log utility
 
   override def receive: Receive = {
-    // :TODO extract tuple to case class
-    case Received(data) => print(data); sender() ! Write(data)
-    //case Received(data: ByteString) if data == ByteString() =>
+    case Received(data) => parseCmd(data.utf8String)
+    case data: String => connection ! makeWrite(data)
+    case Question(data) => {
+      val answer = sender()
+      connection ! makeWrite(data)
+      context.become({
+        case Received(data) => answer ! data.decodeString("UTF-8").stripLineEnd
+        case data: String => connection ! makeWrite(data)
+        case _ => println("Client Question Error")
+      }, discardOld = false)
+    }
+    case PeerClosed => context stop self
     case _ => log.info("receive strange data")
   }
+
+  private def parseCmd(cmd: String) = {
+    cmd.dropRight(2) match {
+      // last 2 char of message is useless, so drop them
+      case ":quit" => makeWrite("connection close"); sender() ! Close
+      case msg: String => println(msg)
+      // case msg: String => println("length = " + msg.length() + ": " + msg) // do nothing now
+      case _ => println("error " + cmd)
+    }
+  }
+
+  private def makeWrite(data: String) = Write(ByteString(data + "\n"))
 }

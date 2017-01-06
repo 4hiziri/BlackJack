@@ -1,9 +1,6 @@
-package acceptanceServer
+package gameServer
 
-import java.io.IOException
-import java.net.Socket
-
-import Suit
+// import ConnectionSetting
 
 object ServerCards {
   private val address: String = ConnectionSetting.SERVER_CARDS_ADDRESS
@@ -11,8 +8,8 @@ object ServerCards {
   private val draw_command: String = "draw"
 }
 
-class ServerCards() {
-  while (true) {
+class ServerCards {
+  /*while (true) {
     {
       try {
         this.conn = new acceptanceServer.Client(new Socket(ServerCards.address, ServerCards.port))
@@ -42,8 +39,8 @@ class ServerCards() {
   }
   private var conn: acceptanceServer.Client = null
 
-  def draw(draw_num: Int): util.List[acceptanceServer.Card] = {
-    val cards: util.ArrayList[acceptanceServer.Card] = new util.ArrayList[acceptanceServer.Card]
+  def draw(draw_num: Int): util.List[Card] = {
+    val cards: util.ArrayList[Card] = new util.ArrayList[Card]
     // カードを要求し、cardsに収める。
     // Suitは使わないため、適当にスペードとする。
     var i: Int = 0
@@ -56,7 +53,7 @@ class ServerCards() {
             card_str = conn.read
           }
         }
-        cards.add(new acceptanceServer.Card(card_str.toInt, Suit.SPADE))
+        cards.add(new Card(card_str.toInt, Suit.SPADE))
       }
       {
         i += 1; i - 1
@@ -68,5 +65,5 @@ class ServerCards() {
   def close() {
     conn.closeStream()
     return
-  }
+  }*/
 }

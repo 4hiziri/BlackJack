@@ -1,4 +1,6 @@
-package acceptanceServer
+package gameServer
+
+import acceptanceServer.Client
 
 class Host(val client: Client) extends Player(client) {
   override def receiveCard(card: Card) {

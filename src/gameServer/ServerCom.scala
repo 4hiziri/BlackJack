@@ -1,13 +1,12 @@
-package acceptanceServer
+package gameServer
 
-import java.io.IOException
-import java.net.Socket
+
 
 object ServerCom {
   private val address: String = ConnectionSetting.SERVER_HOST_ADDRESS
   private val port: Int = ConnectionSetting.SERVER_HOST_PORT
 
-  def getConnection: acceptanceServer.Client = {
+  /*def getConnection: acceptanceServer.Client = {
     var client: acceptanceServer.Client = null
     while (true) {
       {
@@ -34,5 +33,5 @@ object ServerCom {
       }
     }
     return client
-  }
+  }*/
 }

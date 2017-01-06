@@ -1,40 +1,19 @@
-package acceptanceServer
-
-import serverApp._
+package gameServer
 
 object BlackJack {
-  private val server_score: ServerScore = new ServerScore
+  private val server_score: gameServer.ServerScore = new gameServer.ServerScore
 }
 
-class BlackJack private[serverApp](val player: Player, val parent: RoomThread) extends Thread {
+class BlackJack private[serverApp](val player: gameServer.Player, val parent: RoomThread) extends Thread {
   this.parent = parent
   this.player = player
-  this.dealer = new ServerCards
+  this.dealer = new gameServer.ServerCards
   this.isFinished = false
   initializeHand()
   private var isFinished: Boolean = false // threadが終了しているかどうか
-  private[serverApp] var player: Player = null
-  private var dealer: ServerCards = null
+  private[serverApp] var player: gameServer.Player = null
+  private var dealer: gameServer.ServerCards = null
   private var parent: RoomThread = null
-
-  /**
-    * initialize player's hand, draw two cards
-    */
-  private def initializeHand() {
-    val cards: util.ArrayList[Card] = dealer.draw(2).asInstanceOf[util.ArrayList[Card]]
-    val length: Int = cards.size
-    // :TODO receiveCardsに
-    var i: Int = 0
-    while (i < length) {
-      {
-        player.receiveCard(cards.get(i))
-      }
-      {
-        i += 1; i - 1
-      }
-    }
-    return
-  }
 
   /**
     * run thread, process game routine
@@ -58,7 +37,7 @@ class BlackJack private[serverApp](val player: Player, val parent: RoomThread) e
     while (!player.getIsDecided) {
       {
         var str_hand: String = ""
-        val player_hand: util.ArrayList[Card] = player.getCard
+        val player_hand: util.ArrayList[gameServer.Card] = player.getCard
         // サーバへ送る文字列を、適切にフォーマットする
         // 今は、1文字の区切りを入れる形式になっているため、","を間に挟んでいる
         var i: Int = 0
@@ -79,43 +58,6 @@ class BlackJack private[serverApp](val player: Player, val parent: RoomThread) e
       }
     }
     return
-  }
-
-  /**
-    * @param hand
-    * @return
-    */
-  private def handToStr(hand: util.ArrayList[Card]): String = {
-    var hand_str: String = ""
-    var i: Int = 0
-    while (i < hand.size) {
-      {
-        hand_str += hand.get(i).getNumber + ", "
-      }
-      {
-        i += 1; i - 1
-      }
-    }
-    return hand_str.substring(0, hand_str.length - 2)
-  }
-
-  /**
-    * @param hand
-    * @return
-    */
-  private def handToStrHostFormat(hand: util.ArrayList[Card]): String = {
-    var hand_str: String = ""
-    hand_str += hand.get(0).getNumber + ", "
-    var i: Int = 1
-    while (i < hand.size) {
-      {
-        hand_str += "*" + ", "
-      }
-      {
-        i += 1; i - 1
-      }
-    }
-    return hand_str.substring(0, hand_str.length - 2)
   }
 
   /**
@@ -183,12 +125,51 @@ class BlackJack private[serverApp](val player: Player, val parent: RoomThread) e
   }
 
   /**
+    * @param hand
+    * @return
+    */
+  private def handToStrHostFormat(hand: util.ArrayList[gameServer.Card]): String = {
+    var hand_str: String = ""
+    hand_str += hand.get(0).getNumber + ", "
+    var i: Int = 1
+    while (i < hand.size) {
+      {
+        hand_str += "*" + ", "
+      }
+      {
+        i += 1;
+        i - 1
+      }
+    }
+    return hand_str.substring(0, hand_str.length - 2)
+  }
+
+  /**
     * print player's hand to only player
     */
   private def printPlayerHand() {
     player.systemMessage("あなたの手は、")
     player.systemMessage(handToStr(player.getCard))
     return
+  }
+
+  /**
+    * @param hand
+    * @return
+    */
+  private def handToStr(hand: util.ArrayList[gameServer.Card]): String = {
+    var hand_str: String = ""
+    var i: Int = 0
+    while (i < hand.size) {
+      {
+        hand_str += hand.get(i).getNumber + ", "
+      }
+      {
+        i += 1;
+        i - 1
+      }
+    }
+    return hand_str.substring(0, hand_str.length - 2)
   }
 
   /**
@@ -235,5 +216,25 @@ class BlackJack private[serverApp](val player: Player, val parent: RoomThread) e
     player.flushHand()
     player.setIsDecided(false)
     initializeHand()
+  }
+
+  /**
+    * initialize player's hand, draw two cards
+    */
+  private def initializeHand() {
+    val cards: util.ArrayList[gameServer.Card] = dealer.draw(2).asInstanceOf[util.ArrayList[gameServer.Card]]
+    val length: Int = cards.size
+    // :TODO receiveCardsに
+    var i: Int = 0
+    while (i < length) {
+      {
+        player.receiveCard(cards.get(i))
+      }
+      {
+        i += 1;
+        i - 1
+      }
+    }
+    return
   }
 }

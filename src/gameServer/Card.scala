@@ -1,6 +1,4 @@
-package acceptanceServer
-
-import Suit
+package gameServer
 
 class Card(val num: Int, val suit: Suit) {
   this.number = num

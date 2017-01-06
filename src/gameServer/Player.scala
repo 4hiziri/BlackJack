@@ -1,10 +1,10 @@
-package acceptanceServer
+package gameServer
 
 class Player(val client: acceptanceServer.Client) {
   this.client = client
+  protected var hand: util.ArrayList[Card] = new util.ArrayList[Card]
   private var isDecided: Boolean = false
   private[serverApp] var client: acceptanceServer.Client = null
-  protected var hand: util.ArrayList[acceptanceServer.Card] = new util.ArrayList[acceptanceServer.Card]
   // :TODO 名前の実装
   private var id: Int = -1
 
@@ -13,23 +13,23 @@ class Player(val client: acceptanceServer.Client) {
     return
   }
 
-  def receiveCard(card: acceptanceServer.Card) {
+  def receiveCard(card: Card) {
     this.hand.add(card)
     systemMessage("カード " + card.getNumber + "を引きました")
     return
   }
 
-  @SuppressWarnings(Array("unchecked")) def getCard: util.ArrayList[acceptanceServer.Card] = {
-    return hand.clone.asInstanceOf[util.ArrayList[acceptanceServer.Card]]
+  def systemMessage(msg: String) {
+    client.println("System: " + msg)
+    return
+  }
+
+  @SuppressWarnings(Array("unchecked")) def getCard: util.ArrayList[Card] = {
+    return hand.clone.asInstanceOf[util.ArrayList[Card]]
   }
 
   def message(str: String) {
     client.println(str)
-    return
-  }
-
-  def systemMessage(msg: String) {
-    client.println("System: " + msg)
     return
   }
 
@@ -52,12 +52,12 @@ class Player(val client: acceptanceServer.Client) {
     return
   }
 
+  private[serverApp] def getIsDecided: Boolean = {
+    return isDecided
+  }
+
   private[serverApp] def setIsDecided(bool: Boolean) {
     isDecided = bool
     return
-  }
-
-  private[serverApp] def getIsDecided: Boolean = {
-    return isDecided
   }
 }

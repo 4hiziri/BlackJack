@@ -29,7 +29,6 @@ object Main {
   def main(args: Array[String]) {
     system.actorOf(Props(classOf[EntryServer],
       "localhost",
-      PORT,
-      Props(classOf[Client]))) // run Server Actor
+      PORT)) // run Server Actor
   }
 }

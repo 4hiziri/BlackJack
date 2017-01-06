@@ -1,4 +1,4 @@
-package acceptanceServer
+package gameServer
 
 /**
   * for convenient

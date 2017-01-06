@@ -1,4 +1,4 @@
-package acceptanceServer
+package gameServer
 
 object Suit extends Enumeration {
   type Suit = Value
