@@ -1,7 +1,5 @@
 package gameServer
 
-
-
 object ServerCom {
   private val address: String = ConnectionSetting.SERVER_HOST_ADDRESS
   private val port: Int = ConnectionSetting.SERVER_HOST_PORT

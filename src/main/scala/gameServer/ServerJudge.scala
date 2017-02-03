@@ -1,7 +1,5 @@
 package gameServer
 
-
-
 object ServerJudge {
   private val address: String = ConnectionSetting.SERVER_JUDGE_ADDRESS
   private val port: Int = ConnectionSetting.SERVER_JUDGE_PORT
