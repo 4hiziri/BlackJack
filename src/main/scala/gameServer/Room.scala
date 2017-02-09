@@ -1,6 +1,5 @@
 package gameServer
 
-import acceptanceServer.Client
 import akka.actor.Actor
 
 /**
@@ -20,8 +19,8 @@ import akka.actor.Actor
   */
 abstract class Room extends Actor {
   override def receive: Receive = {
-    case client: Client => join(client); self ! Check
-    case Check => if (check()) notify() else self ! Play
+    case client: Player => join(client); self ! Check
+    case Check => if (check()) result() else self ! Play
     case Play => play(); self ! Check
     case player: Player => leave(player)
     case _ =>
@@ -29,11 +28,11 @@ abstract class Room extends Actor {
 
   def check(): Boolean
 
-  def notify(): Unit
+  def result(): Unit
 
-  def join(client: Client): Unit
+  def join(client: Player): Unit
 
   def play(): Unit
 
-  def leave(player: Player)
+  def leave(player: Player): Unit
 }
