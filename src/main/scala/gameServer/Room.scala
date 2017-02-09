@@ -16,12 +16,14 @@ import akka.actor.Actor
   * notify() - notify() players game result, implement how to notify players here
   * join(Client) - join(Client) adds player to game, implement how to add players to game here
   * play() - play() run game process, implement how to play game here and recommend processing concurrent
+  * leave(Player) - leave(Player) have player leave game, implement how to leave from game
   */
 abstract class Room extends Actor {
   override def receive: Receive = {
     case client: Client => join(client); self ! Check()
     case _: Check => if (check()) notify() else self ! Play()
     case _: Play => play(); self ! Check()
+    case player: Player => leave(player)
     case _ =>
   }
 
@@ -32,4 +34,6 @@ abstract class Room extends Actor {
   def join(client: Client): Unit
 
   def play(): Unit
+
+  def leave(player: Player)
 }
