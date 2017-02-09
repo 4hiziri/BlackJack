@@ -3,7 +3,7 @@ package gameServer
 import gameServer.Suit.Suit
 
 // :TODO singleton and make playing card set
-case class Card(val number: Int, val suit: Suit)
+case class Card(number: Int, suit: Suit)
 
 object Card {
 
