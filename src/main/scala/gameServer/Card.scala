@@ -1,16 +1,5 @@
 package gameServer
 
-class Card(val num: Int, val suit: Suit) {
-  this.number = num
-  this.suit = suit
-  private var number: Int = 0
-  private var suit: Suit = null
+import gameServer.Suit.Suit
 
-  def getNumber: Int = {
-    return number
-  }
-
-  def getSuit: Suit = {
-    return suit
-  }
-}
+case class Card(val number: Int, val suit: Suit)
