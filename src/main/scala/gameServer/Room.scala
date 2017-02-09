@@ -20,9 +20,9 @@ import akka.actor.Actor
   */
 abstract class Room extends Actor {
   override def receive: Receive = {
-    case client: Client => join(client); self ! Check()
-    case _: Check => if (check()) notify() else self ! Play()
-    case _: Play => play(); self ! Check()
+    case client: Client => join(client); self ! Check
+    case Check => if (check()) notify() else self ! Play
+    case Play => play(); self ! Check
     case player: Player => leave(player)
     case _ =>
   }
