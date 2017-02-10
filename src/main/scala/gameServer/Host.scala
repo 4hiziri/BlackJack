@@ -1,14 +1,24 @@
 package gameServer
 
-import acceptanceServer.Client
+import akka.actor.ActorRef
 
-class Host(val client: Client) extends Player(client) {
-  override def receiveCard(card: Card) {
-    this.hand.add(card)
-    return
+import scala.collection.immutable.Queue
+
+class Host(val client: ActorRef) extends CardGamePlayer(-1, client) {
+  override def receivesCard(card: Card) {
+    _hand = _hand :+ card
   }
 
-  override def systemMessage(msg: String) {
-    return
+  override def listen(): Queue[String] = nextAct()
+
+  private def nextAct(): Queue[String] = {
+    val score = GameProcess.score(_hand)
+    val act = Queue[String]()
+
+    if (score < 17) act.enqueue(":hit")
+    else if (17 <= score && score <= 21) act.enqueue(":stay")
+    else act
   }
 }
+
+object Host

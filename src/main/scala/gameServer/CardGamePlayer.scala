@@ -12,7 +12,7 @@ import scala.concurrent.{Await, Future}
 class CardGamePlayer(id: Int, client: ActorRef) extends Player with Cloneable {
   var isDecided: Boolean = false
   var name: String = "Player" + id
-  private var _hand: Seq[Card] = Seq[Card]()
+  protected var _hand: Seq[Card] = Seq[Card]()
 
   def hand: Seq[Card] = _hand
 
