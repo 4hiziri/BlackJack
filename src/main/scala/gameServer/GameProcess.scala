@@ -54,6 +54,18 @@ class GameProcess(manager: ActorRef, player: CardGamePlayer) extends Actor {
 
 object GameProcess {
 
-  case object Run
+  def score(rowHand: Seq[Card]): Int = {
+    def toPoint(num: Int): Int =
+      if (num == 11 || num == 12 || num == 13) 10
+      else num
 
+    var point = 0
+    val hand = rowHand.map((card: Card) => toPoint(card.number))
+
+    point = hand.map((num: Int) => if (num == 1) 11 else num).sum
+    if (point > 21) point = hand.sum
+    point
+  }
+
+  case object Run
 }
