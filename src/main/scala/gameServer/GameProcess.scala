@@ -27,7 +27,7 @@ class GameProcess(manager: ActorRef, player: CardGamePlayer) extends Actor {
   private def parseMsg(msg: String): Unit = {
     msg match {
       case ":hit" => if (!player.isDecided) hit() else player.receivesMessage("You can't!")
-      case ":stand" => stand()
+      case ":stay" => stand()
       case ":hand" => player.receivesMessage(handToString(player.hand))
       case ":hand dealer" => {
         val futureHost = manager ? Host
