@@ -26,6 +26,7 @@ class GameProcess(manager: ActorRef, player: CardGamePlayer) extends Actor {
 
   private def parseMsg(msg: String): Unit = {
     msg match {
+      case ":bet" =>
       case ":hit" => if (!player.isDecided) hit() else player.receivesMessage("You can't!")
       case ":stay" => stand()
       case ":hand" => player.receivesMessage(handToString(player.hand))
@@ -34,6 +35,9 @@ class GameProcess(manager: ActorRef, player: CardGamePlayer) extends Actor {
         val host = Await.result(futureHost, Duration.Inf).asInstanceOf[CardGamePlayer]
         player.receivesMessage(handToString(host.hand))
       }
+      case ":double down" =>
+      case ":split" =>
+      case ":surrender" =>
       case ":quit" => player.leaves()
       case _ => manager ! msg
     }
@@ -53,7 +57,29 @@ class GameProcess(manager: ActorRef, player: CardGamePlayer) extends Actor {
 }
 
 object GameProcess {
+  /**
+    * return does p1 win against p2
+    *
+    * @param p1 Host
+    * @param p2 CardGamePlayer
+    * @return
+    */
+  def judge(p1: Host)(p2: CardGamePlayer): Result = {
+    val scoreP1 = score(p1.hand)
+    val scoreP2 = score(p2.hand)
 
+    if (isWin(scoreP1, scoreP2)) Win
+    else if (isLose(scoreP1, scoreP2)) Lose
+    else if (isDraw(scoreP1, scoreP2)) Draw
+    else Draw // :TODO error handling
+  }
+
+  /**
+    * return score of hand
+    *
+    * @param rowHand
+    * @return
+    */
   def score(rowHand: Seq[Card]): Int = {
     def toPoint(num: Int): Int =
       if (num == 11 || num == 12 || num == 13) 10
@@ -66,6 +92,25 @@ object GameProcess {
     if (point > 21) point = hand.sum
     point
   }
+
+  // :TODO logic is shared and adopt more efficient way?
+  private def isWin(s1: Int, s2: Int): Boolean = isBust(s2) ||
+    !isBust(s1) && !isBust(s2) && s1 > s2
+
+  private def isLose(s1: Int, s2: Int): Boolean = !isBust(s2) && isBust(s1) ||
+    !isBust(s1) && !isBust(s2) && s1 < s2
+
+  private def isDraw(s1: Int, s2: Int): Boolean = !isBust(s1) && !isBust(s2) && s1 == s2
+
+  def isBust(score: Int): Boolean = score > 21
+
+  sealed class Result
+
+  final case object Win extends Result
+
+  final case object Lose extends Result
+
+  final case object Draw extends Result
 
   case object Run
 }
