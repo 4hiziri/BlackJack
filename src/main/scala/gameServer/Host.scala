@@ -1,10 +1,8 @@
 package gameServer
 
-import akka.actor.ActorRef
-
 import scala.collection.immutable.Queue
 
-class Host(val client: ActorRef) extends CardGamePlayer(-1, client) {
+class Host() extends CardGamePlayer(-1, null) {
   override def receivesCard(card: Card) {
     _hand = _hand :+ card
   }
@@ -19,6 +17,8 @@ class Host(val client: ActorRef) extends CardGamePlayer(-1, client) {
     else if (17 <= score && score <= 21) act.enqueue(":stay")
     else act
   }
+
+  override def receivesMessage(str: String): Unit = {}
 }
 
 object Host

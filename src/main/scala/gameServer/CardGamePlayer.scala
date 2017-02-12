@@ -43,7 +43,6 @@ class CardGamePlayer(id: Int, client: ActorRef) extends Player with Cloneable {
 
   def receivesCard(card: Card) {
     _hand = _hand :+ card
-    receivesMessage("カード " + card.number + "を引きました")
   }
 
   override def toString: String = name
