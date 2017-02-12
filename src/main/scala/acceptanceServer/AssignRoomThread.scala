@@ -22,7 +22,7 @@ class AssignRoomThread extends Actor {
   override def receive: Receive = {
     case x: Socket => {
       val props = Props(classOf[Client], x) // :TODO Error handling, x is not Client
-      val client = Main.system.actorOf(props, name = "Client")
+      val client = Main.system.actorOf(props, name = "client")
     }
     case _ => // nothing to do
   }

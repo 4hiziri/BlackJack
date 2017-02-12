@@ -28,8 +28,7 @@ class EntryServer(address: String, port: Int) extends Actor {
 
   private def throwToReceptionist(): Unit = {
     val connection = sender()
-    val props = Props(classOf[Client], connection)
-    val handler = context.actorOf(props)
+    val handler = context.actorOf(Props(classOf[Client], connection))
     val receipt = context.actorOf(Props(classOf[Receptionist]))
 
     connection ! Register(handler)

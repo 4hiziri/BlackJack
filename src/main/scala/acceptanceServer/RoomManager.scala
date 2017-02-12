@@ -1,12 +1,12 @@
 package acceptanceServer
 
-// import gameServer.RoomThread
+import akka.actor.Props
 class RoomThread(testi: Int, testj: Int) {}
 
 // dummy
 /**
   * 全ての部屋を管理する，部屋の数や部屋に入る数も管理する 各部屋へPlayerを送る どの部屋へ送るかはIDで管理する
-  * :TODO 1サーバ毎にルームとする方式に変更する
+  * :TODO あらかじめ実体化し、メッセージで処理をすすめるようにする。要調査
   */
 object RoomManager {
   val max_entry = Main.ENTRY_LIMIT
@@ -14,7 +14,8 @@ object RoomManager {
   var room_threads: IndexedSeq[RoomThread] = Vector()
 
   for (i <- 1 until max_entry) {
-    room_threads :+= new RoomThread(i, max_entry) // :TODO make some Actor
+    val thread = Main.system.actorOf(Props(classOf[RoomThread], i, max_entry))
+    room_threads :+= thread
   }
 
 
