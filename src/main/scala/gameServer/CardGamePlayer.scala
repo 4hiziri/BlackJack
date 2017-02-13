@@ -1,9 +1,12 @@
 package gameServer
 
+import java.util.concurrent.TimeUnit
+
 import acceptanceServer.{Get, Question}
 import akka.actor.ActorRef
 import akka.io.Tcp.PeerClosed
 import akka.pattern._
+import akka.util.Timeout
 
 import scala.collection.immutable._
 import scala.concurrent.duration.Duration
@@ -17,11 +20,15 @@ class CardGamePlayer(id: Int, client: ActorRef) extends Player with Cloneable {
   def hand: Seq[Card] = _hand
 
   def answers(question: String): String = {
+    implicit val timeout = Timeout(10, TimeUnit.MINUTES)
+    // ? 実行時の暗黙タイムアウト設定
     val answer: Future[Any] = this.client ? Question(question)
     Await.result(answer, Duration.Inf).asInstanceOf[String]
   }
 
   def listen(): Queue[String] = {
+    implicit val timeout = Timeout(5000, TimeUnit.MILLISECONDS)
+    // ? 実行時の暗黙タイムアウト設定
     val que: Future[Any] = client ? Get
     Await.result(que, Duration.Inf).asInstanceOf[Queue[String]]
   }
@@ -47,5 +54,5 @@ class CardGamePlayer(id: Int, client: ActorRef) extends Player with Cloneable {
 
   override def toString: String = name
 
-  private[serverApp] def flushHand(): Unit = _hand = Seq[Card]()
+  def flushHand(): Unit = _hand = Seq[Card]()
 }
