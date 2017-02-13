@@ -1,21 +1,26 @@
 package acceptanceServer
 
-import akka.actor.Props
-class RoomThread(testi: Int, testj: Int) {}
+import akka.actor.{ActorRef, Props}
+import gameServer.{CardGamePlayer, RoomThread}
 
-// dummy
 /**
   * 全ての部屋を管理する，部屋の数や部屋に入る数も管理する 各部屋へPlayerを送る どの部屋へ送るかはIDで管理する
   * :TODO あらかじめ実体化し、メッセージで処理をすすめるようにする。要調査
   */
 object RoomManager {
-  val max_entry = Main.ENTRY_LIMIT
-  val max_room = Main.ROOM_LIMIT
-  var room_threads: IndexedSeq[RoomThread] = Vector()
+  val maxEntry = Main.ENTRY_LIMIT
+  val maxRoom = Main.ROOM_LIMIT
+  var roomThreads: Seq[ActorRef] = Seq()
 
-  for (i <- 1 until max_entry) {
-    val thread = Main.system.actorOf(Props(classOf[RoomThread], i, max_entry))
-    room_threads :+= thread
+  for (i <- 1 until maxEntry) {
+    val actor = Main.system.actorOf(Props(classOf[RoomThread], i, maxEntry))
+    roomThreads :+= actor
+  }
+
+  def moveToRoom(id: Int, client: ActorRef): Unit = {
+    // temporary ignore id
+    val player = new CardGamePlayer(-1, client)
+    roomThreads.head ! player
   }
 
 
