@@ -58,7 +58,7 @@ class GameProcess(manager: ActorRef, player: CardGamePlayer) extends Actor {
 
 object GameProcess {
   /**
-    * return does p1 win against p2
+    * return does p2 win against p1
     *
     * @param p1 Host
     * @param p2 CardGamePlayer
@@ -68,8 +68,8 @@ object GameProcess {
     val scoreP1 = score(p1.hand)
     val scoreP2 = score(p2.hand)
 
-    if (isWin(scoreP1, scoreP2)) Win
-    else if (isLose(scoreP1, scoreP2)) Lose
+    if (isWin(scoreP1, scoreP2)) Lose
+    else if (isLose(scoreP1, scoreP2)) Win
     else if (isDraw(scoreP1, scoreP2)) Draw
     else Draw // :TODO error handling
   }
@@ -97,12 +97,12 @@ object GameProcess {
   private def isWin(s1: Int, s2: Int): Boolean = isBust(s2) ||
     !isBust(s1) && !isBust(s2) && s1 > s2
 
+  def isBust(score: Int): Boolean = score > 21
+
   private def isLose(s1: Int, s2: Int): Boolean = !isBust(s2) && isBust(s1) ||
     !isBust(s1) && !isBust(s2) && s1 < s2
 
   private def isDraw(s1: Int, s2: Int): Boolean = !isBust(s1) && !isBust(s2) && s1 == s2
-
-  def isBust(score: Int): Boolean = score > 21
 
   sealed class Result
 
