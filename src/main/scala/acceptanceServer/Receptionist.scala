@@ -3,7 +3,6 @@ package acceptanceServer
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{Actor, ActorRef}
-import akka.io.Tcp.PeerClosed
 import akka.pattern._
 import akka.util.Timeout
 
@@ -20,10 +19,7 @@ class Receptionist extends Actor {
     case client: ActorRef => {
       val room_id = readValidRoomNumberFromClient(client, Main.ROOM_LIMIT - 1)
       System.out.println("Access to Room" + room_id) // :TODO logging
-      // RoomManager.moveToRoom(room_id, client)
-      client ! s"test ends here, RoomID = ${room_id}\n"
-      client ! PeerClosed
-      context stop self
+      RoomManager.moveToRoom(room_id.getOrElse(0), client)
     }
     case _ =>
   }
