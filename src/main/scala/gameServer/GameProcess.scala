@@ -38,7 +38,7 @@ class GameProcess(manager: ActorRef, player: CardGamePlayer) extends Actor {
       case ":double down" =>
       case ":split" =>
       case ":surrender" =>
-      case ":quit" => player.leaves()
+      case ":quit" => manager ! player
       case _ => manager ! msg
     }
   }
