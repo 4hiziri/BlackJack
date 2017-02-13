@@ -1,6 +1,6 @@
 package gameServer
 
-import gameServer.Suit.Suit
+import gameServer.Card.Suit
 
 // :TODO singleton and make playing card set
 case class Card(number: Int, suit: Suit)
