@@ -23,8 +23,11 @@ abstract class Room extends Actor {
     case Check => if (check()) result() else self ! Play
     case Play => play(); self ! Check
     case player: Player => leave(player)
+    case Host => sender() ! host()
     case _ =>
   }
+
+  def host() = null
 
   def check(): Boolean
 
