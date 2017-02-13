@@ -29,9 +29,12 @@ class Client(connection: ActorRef) extends Actor {
         case _ => println("Client Question Error")
       }, discardOld = false)
     }
-    case Get => sender() ! messageQue
+    case Get => {
+      sender() ! messageQue
+      messageQue = Queue()
+    }
     case PeerClosed => context stop self
-    case _ => log.info("receive strange data")
+    case strange => log.info("receive strange data: " + strange)
   }
 
   private def makeWrite(data: String) = Write(ByteString(data + "\n"))
