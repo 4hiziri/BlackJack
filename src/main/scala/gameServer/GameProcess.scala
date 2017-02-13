@@ -1,7 +1,10 @@
 package gameServer
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor.{Actor, ActorRef}
 import akka.pattern._
+import akka.util.Timeout
 import gameServer.GameProcess.Run
 
 import scala.concurrent.Await
@@ -31,6 +34,8 @@ class GameProcess(manager: ActorRef, player: CardGamePlayer) extends Actor {
       case ":stay" => stand()
       case ":hand" => player.receivesMessage(handToString(player.hand))
       case ":hand dealer" => {
+        implicit val timeout = Timeout(10, TimeUnit.MINUTES)
+        // ? 実行時の暗黙タイムアウト設定
         val futureHost = manager ? Host
         val host = Await.result(futureHost, Duration.Inf).asInstanceOf[CardGamePlayer]
         player.receivesMessage(handToString(host.hand))
@@ -53,7 +58,7 @@ class GameProcess(manager: ActorRef, player: CardGamePlayer) extends Actor {
     player.receivesMessage("Stand!")
   }
 
-  private def handToString(hand: Seq[Card]): String = hand.reduce((c1: Card, c2: Card) => c1 + ", " + c2)
+  private def handToString(hand: Seq[Card]): String = hand.map(_.toString).reduce((c1: String, c2: String) => c1 + ", " + c2)
 }
 
 object GameProcess {
